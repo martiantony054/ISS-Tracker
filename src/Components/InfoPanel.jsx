@@ -30,7 +30,7 @@ export function InfoPanel({ latitude, longitude, altitude, lastUpdate }) {
     };
 
     updateTime();
-    const interval = setInterval(updateTime, 1000);
+    const interval = setInterval(updateTime, 5000);
     return () => clearInterval(interval);
   }, [lastUpdate]);
 
