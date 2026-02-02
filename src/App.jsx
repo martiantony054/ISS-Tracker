@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { Map } from "./Components/Map";
-import { InfoPanel } from "./Components/InfoPanel";
-import { Controls } from "./Components/Controls";
 import { Satellite } from "lucide-react";
+import { Map } from "./Components/Map";
+import Controls from "./Components/Controls";
+import InfoPanel from "./Components/InfoPanel";
 
 function App() {
   const [position, setPosition] = useState(null);
@@ -71,6 +71,7 @@ function App() {
               <p className="text-xs text-slate-400">ISS Tracker</p>
             </div>
           </div>
+
           <Controls
             isLoading={isLoading}
             error={error}
@@ -88,6 +89,7 @@ function App() {
 
         {/* Info Panel */}
         <div className="w-full max-w-3xl mx-auto">
+         
           <InfoPanel
             position={position}
             lastUpdated={lastUpdated}

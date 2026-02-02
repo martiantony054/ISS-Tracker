@@ -1,55 +1,43 @@
 import { Button } from "@mui/material";
-import { RefreshCw, Activity } from "lucide-react";
+import { RefreshCw, Wifi, WifiOff, Loader2 } from "lucide-react";
 
-export function Controls({ isRefreshing, status, onRefresh }) {
-  const statusConfig = {
-    live: {
-      text: "Live Tracking",
-      color: "text-emerald-400",
-      bgColor: "bg-emerald-400/10",
-      borderColor: "border-emerald-400/30",
-      icon: <Activity size={14} className="text-emerald-400" />,
-    },
-    error: {
-      text: "Connection Error",
-      color: "text-red-400",
-      bgColor: "bg-red-400/10",
-      borderColor: "border-red-400/30",
-      icon: <Activity size={14} className="text-red-400" />,
-    },
-    updating: {
-      text: "Updating...",
-      color: "text-cyan-400",
-      bgColor: "bg-cyan-400/10",
-      borderColor: "border-cyan-400/30",
-      icon: <Activity size={14} className="text-cyan-400 animate-pulse" />,
-    },
-  };
-
-  const config = statusConfig[status];
-
+function Controls({ isLoading, error, onRefresh }) {
   return (
-    <div className="flex items-center justify-between gap-4">
-      <div
-        className={`flex items-center gap-2 px-4 py-2 rounded-full border ${config.bgColor} ${config.borderColor}`}
-      >
-        {config.icon}
-        <span className={`text-sm font-medium ${config.color}`}>
-          {config.text}
-        </span>
+    <div className="flex items-center gap-4">
+      {/* Status Indicator */}
+      <div className="flex items-center gap-2 text-sm font-medium">
+        {isLoading ? (
+          <div className="flex items-center gap-2 text-cyan-400">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Updating...</span>
+          </div>
+        ) : error ? (
+          <div className="flex items-center gap-2 text-red-400">
+            <WifiOff className="w-4 h-4" />
+            <span>Offline</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-emerald-400">
+            <Wifi className="w-4 h-4" />
+            <span>Live</span>
+          </div>
+        )}
       </div>
 
+      {/* Refresh Button */}
+      {/* Changed variant to "default" to prevent crash, styled manually with className */}
       <Button
         onClick={onRefresh}
-        disabled={isRefreshing}
-        className="bg-cyan-500 hover:bg-cyan-600 text-white font-medium px-6 gap-2 shadow-lg shadow-cyan-500/25 transition-all"
+        disabled={isLoading}
+        variant="default"
+        size="sm"
+        className="bg-transparent text-slate-300 border border-slate-700 hover:bg-slate-800 hover:text-white hover:border-slate-600 shadow-none"
       >
-        <RefreshCw
-          size={16}
-          className={isRefreshing ? "animate-spin" : ""}
-        />
-        Refresh Now
+        <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+        Refresh
       </Button>
     </div>
   );
 }
+
+export default Controls;
