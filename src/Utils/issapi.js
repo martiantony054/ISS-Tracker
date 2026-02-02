@@ -1,4 +1,4 @@
-const API_URL = "http://api.open-notify.org/iss-now.json";
+const API_URL = "https://api.open-notify.org/iss-now.json";
 const MAX_RETRIES = 3;
 const BASE_DELAY = 1000;
 
