@@ -1,4 +1,4 @@
-const API_URL = "https://api.open-notify.org/iss-now.json";
+const API_URL = "https://api.wheretheiss.at/v1/satellites/25544";
 const MAX_RETRIES = 3;
 const BASE_DELAY = 1000;
 
@@ -32,8 +32,8 @@ export async function fetchISSPosition() {
   const averageAltitude = 408; // km
 
   return {
-    latitude: parseFloat(data.iss_position.latitude),
-    longitude: parseFloat(data.iss_position.longitude),
+    latitude: parseFloat(data.latitude),
+    longitude: parseFloat(data.longitude),
     altitude: averageAltitude,
   };
 }
