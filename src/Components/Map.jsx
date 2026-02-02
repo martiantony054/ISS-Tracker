@@ -1,6 +1,6 @@
 import { Satellite } from "lucide-react";
 import world from "/world.svg"
-export function Map({ latitude, longitude, isLoading }) {
+function Map({ latitude, longitude, isLoading }) {
   // Handle null/undefined for calculations (defaults to 0 if data hasn't loaded yet)
   const safeLat = latitude ?? 0;
   const safeLon = longitude ?? 0;
@@ -69,3 +69,4 @@ export function Map({ latitude, longitude, isLoading }) {
     </div>
   );
 }
+export default Map

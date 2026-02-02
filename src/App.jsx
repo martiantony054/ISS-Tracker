@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Satellite } from "lucide-react";
-import { Map } from "./Components/Map";
 import Controls from "./Components/Controls";
 import InfoPanel from "./Components/InfoPanel";
+import Map from "./Components/Map";
 
 function App() {
   const [position, setPosition] = useState(null);
@@ -84,12 +84,17 @@ function App() {
       <main className="pt-24 pb-12 px-4 max-w-7xl mx-auto space-y-6">
         {/* Map Section */}
         <div className="w-full">
-          <Map position={position} isLoading={isLoading} />
+          {position && (
+            <Map
+              latitude={position.latitude}
+              longitude={position.longitude}
+              isLoading={isLoading}
+            />
+          )}
         </div>
 
         {/* Info Panel */}
         <div className="w-full max-w-3xl mx-auto">
-         
           <InfoPanel
             position={position}
             lastUpdated={lastUpdated}
