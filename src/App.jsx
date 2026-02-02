@@ -2,31 +2,44 @@ import { useState, useEffect } from "react";
 import { Map } from "./Components/Map";
 import { InfoPanel } from "./Components/InfoPanel";
 import { Controls } from "./Components/Controls";
-import { fetchISSPosition } from "./Utils/issapi";
+import { Satellite } from "lucide-react";
 
 function App() {
-  const [position, setPosition] = useState({
-    latitude: null,
-    longitude: null,
-    altitude: 408,
-    timestamp: Date.now(),
-  });
+  const [position, setPosition] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
-  const [status, setStatus] = useState("updating");
+  const [error, setError] = useState(null);
 
-  const updatePosition = async () => {
-    setIsLoading(true);
-    setStatus("updating");
-    
+  // Fetch data from the new, reliable API
+  const fetchISSPosition = async () => {
     try {
-      const data = await fetchISSPosition();
-      setPosition(data);
-      setStatus("live");
-    } catch (error) {
-      console.error("Failed to fetch ISS position:", error);
-      setStatus("error");
-      // Retry after 3 seconds on error
-      setTimeout(updatePosition, 3000);
+      // Using api.wheretheiss.at - HTTPS enabled and reliable
+      const response = await fetch(
+        "https://api.wheretheiss.at/v1/satellites/25544",
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const data = await response.json();
+
+      // The new API returns numbers directly
+      const newPosition = {
+        latitude: data.latitude,
+        longitude: data.longitude,
+        altitude: data.altitude,
+        velocity: data.velocity,
+        timestamp: data.timestamp * 1000, // Convert to milliseconds
+      };
+
+      setPosition(newPosition);
+      setLastUpdated(Date.now());
+      setError(null);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      // CRITICAL: Do NOT set position to null on error to keep marker at last known spot
+      setError("Failed to update. Retrying...");
     } finally {
       setIsLoading(false);
     }
@@ -34,70 +47,52 @@ function App() {
 
   useEffect(() => {
     // Initial fetch
-    updatePosition();
+    fetchISSPosition();
 
-    // Set up interval for updates every 5 seconds
-    const interval = setInterval(updatePosition, 5000);
+    // Poll every 5 seconds
+    const interval = setInterval(fetchISSPosition, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-white">
       {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                className="w-6 h-6 text-white"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-              </svg>
+            <div className="p-2 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg shadow-lg shadow-cyan-500/20">
+              <Satellite className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Orbit</h1>
-              <p className="text-xs text-gray-400">ISS Real-Time Tracker</p>
+              <h1 className="text-xl font-bold tracking-tight text-white">
+                Orbit
+              </h1>
+              <p className="text-xs text-slate-400">ISS Tracker</p>
             </div>
           </div>
           <Controls
-            isRefreshing={isLoading}
-            status={status}
-            onRefresh={updatePosition}
+            isLoading={isLoading}
+            error={error}
+            onRefresh={fetchISSPosition}
           />
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+      <main className="pt-24 pb-12 px-4 max-w-7xl mx-auto space-y-6">
         {/* Map Section */}
-        <section>
-          <Map
-            latitude={position.latitude}
-            longitude={position.longitude}
-            isLoading={isLoading}
-          />
-        </section>
+        <div className="w-full">
+          <Map position={position} isLoading={isLoading} />
+        </div>
 
         {/* Info Panel */}
-        <section>
+        <div className="w-full max-w-3xl mx-auto">
           <InfoPanel
-            latitude={position.latitude}
-            longitude={position.longitude}
-            altitude={position.altitude}
-            lastUpdate={position.timestamp}
+            position={position}
+            lastUpdated={lastUpdated}
+            isLoading={isLoading}
           />
-        </section>
-
-        {/* Footer Info */}
-        <div className="text-center text-gray-500 text-sm py-4">
-          <p>Data updates every 5 seconds • Position accuracy: ±5km</p>
-          <p className="mt-1">Powered by Open-Notify API</p>
         </div>
       </main>
     </div>
